@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700&display=swap');
+
+@theme {
+  --color-[#070708]: #08080A;
+  --color-brand-obsidian: #08080A;
+  --color-brand-surface: #121216;
+  --color-brand-surface-elevated: #1A1A22;
+  --color-brand-red: #E60023;
+  --color-brand-red-dark: #7A0012;
+  --color-brand-crimson: #C8102E;
+  --color-brand-gold: #D4AF37;
+  --color-brand-gold-bright: #F5D77F;
+  --color-brand-porcelain: #F7F5F0;
+  --color-brand-muted: #9A9A9E;
+  --color-brand-border: rgba(255, 255, 255, 0.1);
+  --color-brand-border-gold: rgba(212, 175, 55, 0.35);
+
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+}
+
+:root {
+  --bg-obsidian: #08080A;
+  --bg-surface: #121216;
+  --bg-surface-elevated: #1A1A22;
+  --accent-red: #E60023;
+  --accent-crimson: #C8102E;
+  --accent-gold: #D4AF37;
+  --accent-gold-bright: #F5D77F;
+  --text-primary: #FFFFFF;
+  --text-muted: #9A9A9E;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-gold: rgba(212, 175, 55, 0.35);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+    background-color: var(--bg-obsidian);
+    color: var(--text-primary);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+  }
+
+  /* Desktop Custom Cursor Hide Rule */
+  @media (min-width: 1024px) {
+    body, a, button, input, select, textarea, [role="button"] {
+      cursor: none !important;
+    }
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-obsidian);
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-gold);
+}
+
+.bg-radial-vignette {
+  background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 45%, rgba(4, 4, 6, 0.65) 100%);
+}
+
+.mask-dof {
+  mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, black 50%, transparent 95%);
+}
+

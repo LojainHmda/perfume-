@@ -1,0 +1,6 @@
+{
+  "name": "HAUTE PARFUMERIE — Born To Stand Out",
+  "description": "An immersive luxury perfume exhibition featuring interactive box unboxing, custom desktop cursor mechanics, and 2x2 synchronized cinematic scent storytelling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
