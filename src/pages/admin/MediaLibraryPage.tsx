@@ -40,6 +40,10 @@ export const MediaLibraryPage: React.FC = () => {
 
   claim(settings.heroImage, 'Hero image');
   claim(settings.heroVideo, 'Hero film');
+  claim(settings.collectionBackground, 'Collection background');
+  (settings.collectionSlides ?? []).forEach((slide, index) => {
+    claim(slide.src, `Collection · plate ${index + 1}`);
+  });
   for (const product of products) {
     claim(product.image, `${product.name} · bottle`);
     (product.mediaPanels ?? []).forEach((panel, index) => {

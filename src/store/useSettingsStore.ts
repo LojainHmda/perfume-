@@ -16,13 +16,16 @@ interface SettingsState {
 
   load: () => Promise<void>;
   save: (patch: Partial<SiteSettings>) => Promise<void>;
+  /** Clear just these keys, so one panel's "restore default" leaves the rest alone. */
+  resetKeys: (keys: (keyof SiteSettings)[]) => Promise<void>;
+  /** Clear every override at once. */
   reset: () => Promise<void>;
 }
 
 const message = (error: unknown, fallback: string): string =>
   error instanceof Error ? error.message : fallback;
 
-export const useSettingsStore = create<SettingsState>((set) => ({
+export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: { ...EMPTY_SITE_SETTINGS },
   isLoading: false,
   isSyncing: false,
@@ -47,6 +50,11 @@ export const useSettingsStore = create<SettingsState>((set) => ({
       set({ isSyncing: false, error: message(error, 'Could not save site settings.') });
       throw error;
     }
+  },
+
+  resetKeys: async (keys) => {
+    const patch = Object.fromEntries(keys.map((key) => [key, null])) as Partial<SiteSettings>;
+    await get().save(patch);
   },
 
   reset: async () => {

@@ -59,6 +59,43 @@ export const TextField: React.FC<TextFieldProps> = ({
   </FieldShell>
 );
 
+interface SelectFieldProps {
+  label: string;
+  /** '' is a real choice here: "no selection". */
+  value: string;
+  onChange: (value: string) => void;
+  options: { value: string; label: string }[];
+  /** Shown as the empty choice. */
+  placeholder?: string;
+  hint?: string;
+  className?: string;
+}
+
+export const SelectField: React.FC<SelectFieldProps> = ({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder = '— None —',
+  hint,
+  className,
+}) => (
+  <FieldShell label={label} hint={hint} className={className}>
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className={`${inputClass} cursor-pointer`}
+    >
+      <option value="">{placeholder}</option>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  </FieldShell>
+);
+
 interface TextAreaFieldProps extends Omit<TextFieldProps, 'mono'> {
   rows?: number;
 }

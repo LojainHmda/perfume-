@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FolderOpen, Image as ImageIcon, LayoutDashboard, Package } from 'lucide-react';
+import { FolderOpen, Image as ImageIcon, Layers, LayoutDashboard, Package } from 'lucide-react';
 
 /**
  * The admin's table of contents. One entry per surface an admin controls —
@@ -10,6 +10,7 @@ import { FolderOpen, Image as ImageIcon, LayoutDashboard, Package } from 'lucide
 const LINKS = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/admin/hero', label: 'Hero', icon: ImageIcon, end: false },
+  { to: '/admin/collection', label: 'Collection', icon: Layers, end: false },
   { to: '/admin/products', label: 'Products', icon: Package, end: false },
   { to: '/admin/media', label: 'Media library', icon: FolderOpen, end: false },
 ];

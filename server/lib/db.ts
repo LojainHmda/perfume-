@@ -1,6 +1,7 @@
 import fs from "fs";
 import type { Fragrance } from "../../src/types/fragrance";
 import type { SiteSettings } from "../../src/types/settings";
+import { EMPTY_SITE_SETTINGS } from "../../src/types/settings";
 import { CONTENT_FILE, ensureDirs } from "./paths";
 
 /**
@@ -17,13 +18,11 @@ export interface ContentStore {
   updatedAt: string | null;
 }
 
-export const EMPTY_SETTINGS: SiteSettings = {
-  heroImage: null,
-  heroVideo: null,
-  heroEyebrow: null,
-  heroHeadline: null,
-  heroTagline: null,
-};
+/**
+ * Re-exported from the shared type rather than restated, so a new setting can
+ * never exist on the client while the store silently drops it here.
+ */
+export const EMPTY_SETTINGS: SiteSettings = EMPTY_SITE_SETTINGS;
 
 const emptyStore = (): ContentStore => ({
   products: null,

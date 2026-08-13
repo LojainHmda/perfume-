@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Film, Image as ImageIcon, Package } from 'lucide-react';
+import { ArrowRight, Film, Image as ImageIcon, Layers, Package } from 'lucide-react';
 import { getDefaultMediaPanels, panelHasCustomMedia, useProductStore } from '../../store/useProductStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
@@ -20,6 +20,14 @@ export const AdminOverviewPage: React.FC = () => {
     settings.heroTagline && 'tagline',
   ].filter(Boolean) as string[];
 
+  const customSlides = settings.collectionSlides;
+  const collectionOverrides = [
+    settings.collectionBackground && 'background',
+    settings.collectionEyebrow && 'eyebrow',
+    settings.collectionHeadline && 'headline',
+    customSlides && `${customSlides.length} plate${customSlides.length === 1 ? '' : 's'}`,
+  ].filter(Boolean) as string[];
+
   const cards = [
     {
       to: '/admin/hero',
@@ -27,6 +35,17 @@ export const AdminOverviewPage: React.FC = () => {
       title: 'Hero',
       value: heroOverrides.length ? `${heroOverrides.length} override${heroOverrides.length > 1 ? 's' : ''}` : 'Default plate',
       detail: heroOverrides.length ? heroOverrides.join(' · ') : 'The shipped campaign image and copy are live.',
+    },
+    {
+      to: '/admin/collection',
+      icon: Layers,
+      title: 'Collection',
+      value: collectionOverrides.length
+        ? `${collectionOverrides.length} override${collectionOverrides.length > 1 ? 's' : ''}`
+        : 'Default frame',
+      detail: collectionOverrides.length
+        ? collectionOverrides.join(' · ')
+        : 'The shipped background and three plates are live.',
     },
     {
       to: '/admin/products',
@@ -58,7 +77,7 @@ export const AdminOverviewPage: React.FC = () => {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(({ to, icon: Icon, title, value, detail }) => (
           <Link
             key={to}

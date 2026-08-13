@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Loader2, Trash2, Upload } from 'lucide-react';
 import { apiUpload } from '../../../api/client';
+import { isVideoUrl } from '../../../utils/media';
 
 interface MediaFieldProps {
   label: string;
@@ -33,7 +34,7 @@ export const MediaField: React.FC<MediaFieldProps> = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const isVideo = /\.(mp4|webm|ogg|mov|m4v)(\?|$)/i.test(value);
+  const isVideo = isVideoUrl(value);
 
   const handleFile = async (file: File | undefined) => {
     if (!file) return;

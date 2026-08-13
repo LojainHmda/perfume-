@@ -10,6 +10,7 @@ import { StoryPage } from './pages/StoryPage';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
 import { HeroSettingsPage } from './pages/admin/HeroSettingsPage';
+import { CollectionSettingsPage } from './pages/admin/CollectionSettingsPage';
 import { ProductsPage } from './pages/admin/ProductsPage';
 import { MediaLibraryPage } from './pages/admin/MediaLibraryPage';
 import { ProductEditorPage } from './pages/admin/product/ProductEditorPage';
@@ -52,6 +53,7 @@ export default function App() {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminOverviewPage />} />
               <Route path="hero" element={<HeroSettingsPage />} />
+              <Route path="collection" element={<CollectionSettingsPage />} />
               <Route path="media" element={<MediaLibraryPage />} />
               <Route path="products" element={<ProductsPage />} />
 
