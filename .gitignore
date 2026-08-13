@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Runtime content written by the admin panel
+data/content.json
+public/uploads/

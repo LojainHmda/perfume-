@@ -1,72 +1,66 @@
 import { create } from 'zustand';
+import { loginRequest, logoutRequest, sessionRequest } from '../api/auth';
+import { ApiError, getToken } from '../api/client';
 
-const AUTH_KEY = 'bts_admin_auth_v1';
-
+/**
+ * Admin session state.
+ *
+ * The server owns the decision — this store only mirrors it. `hydrate()` asks
+ * the API whether the stored bearer token is still live, so a refresh inside a
+ * valid session lands straight back in the panel.
+ */
 interface AdminAuthState {
   isAdmin: boolean;
   username: string | null;
-  login: (user: string, pass: string) => { success: boolean; message: string };
-  logout: () => void;
-  autofillAdminCredentials: () => { user: string; pass: string };
+  isChecking: boolean;
+  hydrate: () => Promise<void>;
+  login: (user: string, pass: string) => Promise<{ success: boolean; message: string }>;
+  logout: () => Promise<void>;
 }
 
+/** Shown on the login card so a fresh checkout can get in. Override with ADMIN_USER / ADMIN_PASS. */
 export const ADMIN_CREDENTIALS = {
   user: 'admin',
   pass: 'admin123',
 };
 
-const getInitialAuth = (): { isAdmin: boolean; username: string | null } => {
-  try {
-    const saved = localStorage.getItem(AUTH_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.isAdmin) {
-        return { isAdmin: true, username: parsed.username || 'admin' };
-      }
+export const useAdminAuthStore = create<AdminAuthState>((set) => ({
+  isAdmin: false,
+  username: null,
+  isChecking: Boolean(getToken()),
+
+  hydrate: async () => {
+    if (!getToken()) {
+      set({ isAdmin: false, username: null, isChecking: false });
+      return;
     }
-  } catch (e) {
-    console.error(e);
-  }
-  return { isAdmin: false, username: null };
-};
 
-export const useAdminAuthStore = create<AdminAuthState>((set) => {
-  const initial = getInitialAuth();
-  return {
-    isAdmin: initial.isAdmin,
-    username: initial.username,
+    set({ isChecking: true });
+    try {
+      const session = await sessionRequest();
+      set({ isAdmin: true, username: session.username, isChecking: false });
+    } catch {
+      set({ isAdmin: false, username: null, isChecking: false });
+    }
+  },
 
-    login: (user, pass) => {
-      const cleanUser = user.trim().toLowerCase();
-      const cleanPass = pass.trim();
+  login: async (user, pass) => {
+    try {
+      const session = await loginRequest(user, pass);
+      set({ isAdmin: true, username: session.username, isChecking: false });
+      return { success: true, message: 'Welcome to the admin portal.' };
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : 'Could not reach the server. Is the API running?';
+      set({ isAdmin: false, username: null, isChecking: false });
+      return { success: false, message };
+    }
+  },
 
-      if (
-        (cleanUser === 'admin' && (cleanPass === 'admin123' || cleanPass === 'admin')) ||
-        (cleanUser === 'manager' && cleanPass === 'admin')
-      ) {
-        set({ isAdmin: true, username: cleanUser });
-        try {
-          localStorage.setItem(AUTH_KEY, JSON.stringify({ isAdmin: true, username: cleanUser }));
-        } catch (e) {
-          console.error(e);
-        }
-        return { success: true, message: 'Welcome to the Admin Portal' };
-      }
-
-      return { success: false, message: 'Invalid Admin Credentials. Please use username: admin / password: admin123' };
-    },
-
-    logout: () => {
-      set({ isAdmin: false, username: null });
-      try {
-        localStorage.removeItem(AUTH_KEY);
-      } catch (e) {
-        console.error(e);
-      }
-    },
-
-    autofillAdminCredentials: () => {
-      return ADMIN_CREDENTIALS;
-    },
-  };
-});
+  logout: async () => {
+    await logoutRequest();
+    set({ isAdmin: false, username: null, isChecking: false });
+  },
+}));

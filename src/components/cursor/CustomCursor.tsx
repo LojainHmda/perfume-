@@ -1,95 +1,239 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { motion, useSpring } from 'motion/react';
-import { useCursorStore } from '../../store/useStore';
+import React, { useEffect, useRef, useState } from 'react';
+import { HAND_TIP_X, HAND_TIP_Y, HAND_VIEW_H, HAND_VIEW_W, LeatherHand } from './LeatherHand';
+
+/**
+ * The house cursor: one global leather hand, no per-component wiring.
+ *
+ * Everything that runs per frame writes straight to the DOM through refs.
+ * React renders this component exactly twice in a session — once on mount, once
+ * if the pointer capability changes — so mouse movement costs no reconciliation.
+ */
+
+/** Rendered width in CSS pixels; height follows the artwork's aspect. */
+const SIZE_W = 66;
+const SIZE_H = (SIZE_W * HAND_VIEW_H) / HAND_VIEW_W;
+
+/** Distance from the element's top-left corner to the drawn fingertip. */
+const TIP_OFFSET_X = (HAND_TIP_X / HAND_VIEW_W) * SIZE_W;
+const TIP_OFFSET_Y = (HAND_TIP_Y / HAND_VIEW_H) * SIZE_H;
+
+/** Follow weight. Low enough to feel carried, high enough never to read as lag. */
+const EASE = 0.24;
+const MAX_TILT = 6;
+
+/**
+ * What counts as clickable. Deliberately structural — roles, semantics and the
+ * pointer-cursor utility class — so no button has to opt in by hand, and plain
+ * copy never lights up.
+ */
+const INTERACTIVE_SELECTOR = [
+  'a[href]',
+  'button',
+  'input:not([type="hidden"])',
+  'select',
+  'textarea',
+  'summary',
+  'label[for]',
+  '[role="button"]',
+  '[role="link"]',
+  '[role="menuitem"]',
+  '[role="tab"]',
+  '[role="switch"]',
+  '[role="option"]',
+  '[contenteditable="true"]',
+  '[tabindex]:not([tabindex="-1"])',
+  '.cursor-pointer',
+  '[data-cursor="interactive"]',
+].join(',');
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+const isDisabled = (el: Element) =>
+  el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
 
 export const CustomCursor: React.FC = () => {
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const { cursorLabel, cursorVariant } = useCursorStore();
-  const mousePos = useRef({ x: -100, y: -100 });
-  
-  // Spring physics for buttery smooth motion without delay or jitter
-  const cursorX = useSpring(-100, { stiffness: 450, damping: 28, mass: 0.2 });
-  const cursorY = useSpring(-100, { stiffness: 450, damping: 28, mass: 0.2 });
-  
-  const trailX = useSpring(-100, { stiffness: 200, damping: 30, mass: 0.5 });
-  const trailY = useSpring(-100, { stiffness: 200, damping: 30, mass: 0.5 });
+  // A real mouse or trackpad only. Touch screens keep their native behaviour.
+  const [isPrecise, setIsPrecise] = useState(false);
+
+  const layerRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const handRef = useRef<HTMLDivElement>(null);
+  const ripplesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Detect touch / tablet screen
-    const checkTouch = () => {
-      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 1024;
-      setIsTouchDevice(hasTouch);
+    const query = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const sync = () => setIsPrecise(query.matches);
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
+
+  useEffect(() => {
+    if (!isPrecise) return;
+
+    const cursor = cursorRef.current;
+    const hand = handRef.current;
+    const ripples = ripplesRef.current;
+    if (!cursor || !hand || !ripples) return;
+
+    const shadow = hand.querySelector<SVGGElement>('.lhc-shadow');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const target = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const pos = { ...target };
+    const velocity = { x: 0, y: 0 };
+
+    let interactive = false;
+    let revealed = false;
+    let scrolled = false;
+    let lastProbe = 0;
+    let frame = 0;
+    const timers = new Set<number>();
+
+    const setInteractive = (next: boolean) => {
+      if (next === interactive) return;
+      interactive = next;
+      cursor.classList.toggle('is-interactive', next);
     };
 
-    checkTouch();
-    window.addEventListener('resize', checkTouch);
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
-      trailX.set(e.clientX);
-      trailY.set(e.clientY);
+    const evaluate = (el: Element | null) => {
+      const hit = el && 'closest' in el ? el.closest(INTERACTIVE_SELECTOR) : null;
+      setInteractive(!!hit && !isDisabled(hit));
     };
 
-    if (!isTouchDevice) {
-      window.addEventListener('mousemove', handleMouseMove);
-    }
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
+      cursor.classList.add('is-visible');
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      target.x = e.clientX;
+      target.y = e.clientY;
+      reveal();
+      evaluate(e.target as Element | null);
+    };
+
+    // The page can move under a still pointer; re-probe what sits beneath it.
+    const onScroll = () => {
+      scrolled = true;
+    };
+
+    const onLeave = () => cursor.classList.remove('is-visible');
+    const onEnter = () => {
+      if (revealed) cursor.classList.add('is-visible');
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      cursor.classList.add('is-pressing');
+      spawnRipple(e.clientX, e.clientY);
+    };
+
+    const onPointerUp = () => cursor.classList.remove('is-pressing');
+
+    /** Two concentric rings, fired once per click and reaped when they finish. */
+    const spawnRipple = (x: number, y: number) => {
+      if (reduceMotion) return;
+
+      const make = (modifier?: string) => {
+        const ring = document.createElement('span');
+        ring.className = modifier ? `lhc-ripple ${modifier}` : 'lhc-ripple';
+        ring.style.left = `${x}px`;
+        ring.style.top = `${y}px`;
+        ripples.appendChild(ring);
+
+        const remove = () => ring.remove();
+        ring.addEventListener('animationend', remove, { once: true });
+        // Safety net: an interrupted animation must not leak a node.
+        const timer = window.setTimeout(() => {
+          remove();
+          timers.delete(timer);
+        }, 1200);
+        timers.add(timer);
+      };
+
+      make();
+      make('lhc-ripple--trailing');
+    };
+
+    const tick = () => {
+      const dx = target.x - pos.x;
+      const dy = target.y - pos.y;
+
+      if (reduceMotion) {
+        pos.x = target.x;
+        pos.y = target.y;
+      } else {
+        pos.x += dx * EASE;
+        pos.y += dy * EASE;
+      }
+
+      velocity.x = velocity.x * 0.82 + dx * 0.18;
+      velocity.y = velocity.y * 0.82 + dy * 0.18;
+
+      cursor.style.transform = `translate3d(${pos.x - TIP_OFFSET_X}px, ${pos.y - TIP_OFFSET_Y}px, 0)`;
+
+      if (!reduceMotion) {
+        // The hand swings from the fingertip, so the contact point never drifts.
+        hand.style.transform = `rotate(${clamp(velocity.x * 0.22, -MAX_TILT, MAX_TILT)}deg)`;
+        if (shadow) {
+          shadow.style.transform = `translate(${clamp(-velocity.x * 0.35, -9, 9)}px, ${clamp(
+            -velocity.y * 0.2,
+            -5,
+            5,
+          )}px)`;
+        }
+      }
+
+      if (scrolled) {
+        const now = performance.now();
+        if (now - lastProbe > 90) {
+          lastProbe = now;
+          scrolled = false;
+          evaluate(document.elementFromPoint(target.x, target.y));
+        }
+      }
+
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerdown', onPointerDown, { passive: true });
+    window.addEventListener('pointerup', onPointerUp, { passive: true });
+    window.addEventListener('pointercancel', onPointerUp, { passive: true });
+    window.addEventListener('blur', onPointerUp);
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    document.documentElement.addEventListener('mouseleave', onLeave);
+    document.documentElement.addEventListener('mouseenter', onEnter);
 
     return () => {
-      window.removeEventListener('resize', checkTouch);
-      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(frame);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      window.removeEventListener('blur', onPointerUp);
+      window.removeEventListener('scroll', onScroll, { capture: true } as EventListenerOptions);
+      document.documentElement.removeEventListener('mouseleave', onLeave);
+      document.documentElement.removeEventListener('mouseenter', onEnter);
+      timers.forEach((timer) => window.clearTimeout(timer));
+      ripples.replaceChildren();
     };
-  }, [isTouchDevice, cursorX, cursorY, trailX, trailY]);
+  }, [isPrecise]);
 
-  if (isTouchDevice) return null;
-
-  // Variants styling logic
-  const getDotStyles = () => {
-    switch (cursorVariant) {
-      case 'hover':
-        return 'w-6 h-6 bg-amber-200/20 border border-amber-300/60 backdrop-blur-sm shadow-[0_0_10px_rgba(212,175,55,0.4)]';
-      case 'magnetic':
-        return 'w-8 h-8 bg-red-900/30 border border-red-500/80 shadow-[0_0_15px_rgba(200,16,46,0.5)]';
-      case 'button':
-        return 'w-6 h-6 bg-amber-400 text-black scale-110';
-      case 'video':
-        return 'w-10 h-10 bg-black/70 border border-red-500/50 backdrop-blur-md';
-      case 'drag':
-        return 'w-8 h-8 bg-amber-400/30 border border-amber-400';
-      default:
-        return 'w-3 h-3 bg-amber-100/90 shadow-[0_0_8px_rgba(255,255,255,0.8)]';
-    }
-  };
+  if (!isPrecise) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[9999] overflow-hidden">
-      {/* Outer Interpolated Ring */}
-      <motion.div
-        style={{
-          x: trailX,
-          y: trailY,
-        }}
-        className="fixed top-0 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-amber-500/30 pointer-events-none transition-all duration-300"
-        animate={{
-          scale: cursorVariant !== 'default' ? 1.3 : 1,
-          opacity: cursorVariant !== 'default' ? 0.7 : 0.3,
-          width: 28,
-          height: 28,
-        }}
-      />
-
-      {/* Main Sharp Interactive Core Cursor */}
-      <motion.div
-        style={{
-          x: cursorX,
-          y: cursorY,
-        }}
-        className={`fixed top-0 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center text-center transition-colors duration-200 pointer-events-none ${getDotStyles()}`}
-        animate={{
-          scale: cursorVariant === 'magnetic' ? 1.2 : cursorVariant === 'button' ? 1.1 : 1,
-        }}
-      />
+    <div className="lhc-layer" ref={layerRef} aria-hidden="true">
+      <div className="lhc-ripples" ref={ripplesRef} />
+      <div className="lhc-cursor" ref={cursorRef}>
+        <div className="lhc-hand" ref={handRef} style={{ width: SIZE_W, height: SIZE_H }}>
+          <LeatherHand />
+        </div>
+      </div>
     </div>
   );
 };

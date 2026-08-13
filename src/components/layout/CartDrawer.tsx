@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useCartStore, useCursorStore } from '../../store/useStore';
 import { useAudio } from '../../hooks/useAudio';
 import { X, Trash2, ShoppingBag, Sparkles, Check } from 'lucide-react';
-import { TransparentBottleImage } from '../common/TransparentBottleImage';
 
 export const CartDrawer: React.FC = () => {
   const { items, isOpen, closeCart, removeItem, updateQuantity, clearCart } = useCartStore();
@@ -91,7 +90,7 @@ export const CartDrawer: React.FC = () => {
                     className="flex gap-4 p-4 bg-zinc-900/60 rounded-xl border border-zinc-800/80"
                   >
                     <div className="w-16 h-24 bg-black/80 rounded-lg p-1 flex items-center justify-center overflow-hidden border border-zinc-800 shrink-0">
-                      <TransparentBottleImage
+                      <img
                         src={item.fragrance.image}
                         alt={item.fragrance.name}
                         className="w-full h-full object-contain filter drop-shadow-sm"

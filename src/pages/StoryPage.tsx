@@ -12,7 +12,7 @@ export const StoryPage: React.FC = () => {
             PARFUM DE LUXE MANIFESTO
           </span>
           <h1 className="text-4xl sm:text-6xl font-serif uppercase tracking-wider text-white font-extralight">
-            Born To Stand Out
+            Checkmate
           </h1>
           <p className="text-sm font-sans tracking-widest text-zinc-400 uppercase max-w-xl mx-auto font-light">
             Rebellious Haute Perfumery • Obsidian Sculptural Aesthetics • visceral scent storytelling
@@ -25,7 +25,7 @@ export const StoryPage: React.FC = () => {
           </p>
 
           <p>
-            Established as a high-concept perfume house, Born To Stand Out treats olfactory creation not as a commercial product line, but as an interactive art exhibition. We fuse old-world master distillation techniques with provocative modern narratives.
+            Established as a high-concept perfume house, CHECKMATE treats olfactory creation not as a commercial product line, but as an interactive art exhibition. We fuse old-world master distillation techniques with provocative modern narratives.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12 pt-6">

@@ -5,6 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // GitHub Pages serves this project from /perfume-/, while the Express
+    // deployment serves it from the domain root. The workflow sets the env var.
+    base: process.env.GITHUB_PAGES === 'true' ? '/perfume-/' : '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
