@@ -18,32 +18,49 @@ const PLATES: Record<string, string> = {
 };
 
 /**
- * Two columns, edge to edge: two stacked tiles on the left, one full-height
- * tile on the right. Every tile is a full-bleed plate with its name set over
- * the lower left and the action underlined beneath it — no frames, no gaps, no
- * card chrome. The grid itself is the composition.
+ * Two columns: two stacked tiles on the left, one full-height tile on the
+ * right. Every tile is a plate with its name set over the lower left and the
+ * action underlined beneath it — no frames, no card chrome. The grid itself is
+ * the composition.
+ *
+ * The plates used to run edge to edge and meet with no gutter. They are now
+ * pulled in and stood apart so the board shows around and between them: the
+ * brand is CHECKMATE, so the ground the collection sits on is literally a
+ * chessboard. Proportions are untouched — the left column still adds up to the
+ * exact height of the right tile, the gutter taken out of the two halves.
  */
 export const CollectionMosaic: React.FC<CollectionMosaicProps> = ({ fragrances }) => {
   const [first, second, third] = fragrances;
 
   return (
-    <section className="w-full bg-obsidian" aria-label="The Grandmaster Series">
-      <div className="px-6 pb-10 pt-24 sm:px-10 sm:pt-28 lg:px-16">
+    <section className="relative w-full overflow-hidden bg-obsidian" aria-label="The Grandmaster Series">
+      {/* The board, faded top and bottom so the section still meets its
+          neighbours on the same obsidian ground. */}
+      <div
+        aria-hidden
+        className="board-checker absolute inset-0 [mask-image:linear-gradient(to_bottom,transparent_0%,#000_10%,#000_90%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_10%,#000_90%,transparent_100%)]"
+      />
+
+      <div className="relative px-6 pb-10 pt-24 sm:px-10 sm:pt-28 lg:px-16">
         <div className="mx-auto flex max-w-[112rem] flex-wrap items-end justify-between gap-4">
           <h2 className="display text-[clamp(1.9rem,4.2vw,3.2rem)] text-porcelain">The Grandmaster Series</h2>
           <p className="notation text-ash">Extrait de Parfum — Paris</p>
         </div>
       </div>
 
-      {/* Full-bleed from here down: the tiles meet with no gutter. */}
-      <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="flex flex-col">
+      <div className="relative mx-auto grid max-w-[96rem] grid-cols-1 gap-6 px-6 pb-20 sm:px-10 lg:grid-cols-2 lg:gap-8 lg:px-16 lg:pb-28">
+        <div className="flex flex-col gap-6 lg:gap-8">
           {[first, second].filter(Boolean).map((fragrance) => (
-            <Tile key={fragrance.id} fragrance={fragrance} className="h-[52svh] min-h-[22rem] lg:h-[45svh]" />
+            // Half the right tile less half the gutter, so the two columns end level.
+            <Tile
+              key={fragrance.id}
+              fragrance={fragrance}
+              className="h-[40svh] min-h-[17rem] lg:h-[calc(35svh-1rem)]"
+            />
           ))}
         </div>
 
-        {third && <Tile fragrance={third} className="h-[70svh] min-h-[30rem] lg:h-[90svh]" />}
+        {third && <Tile fragrance={third} className="h-[54svh] min-h-[23rem] lg:h-[70svh]" />}
       </div>
     </section>
   );
