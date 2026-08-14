@@ -300,8 +300,9 @@
 
 .lhc-hand {
   will-change: transform;
-  /* Swing point is the fingertip, so tilt never moves the contact point. */
-  transform-origin: 32.22% 13.08%;
+  /* Swing point is the fingertip, so tilt never moves the contact point.
+     Must match HAND_TIP_X/Y over HAND_VIEW_W/H in LeatherHand.tsx. */
+  transform-origin: 30.18% 4.91%;
 }
 
 .lhc-svg {
@@ -309,7 +310,7 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  transform-origin: 32.22% 13.08%;
+  transform-origin: 30.18% 4.91%;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -330,8 +331,11 @@
   transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Travel is in view units, so it scales with the artwork's viewBox rather than
+   with the rendered size — the same 1/3 units that read on a 180x260 drawing
+   are invisible on an 814-unit-tall one. */
 .lhc-cursor.is-pressing .lhc-finger {
-  transform: translate(1px, 3px) rotate(2.5deg);
+  transform: translate(3px, 9px) rotate(2.5deg);
 }
 
 /* Gold rays: hidden by default, opened only over something clickable. */
@@ -339,7 +343,8 @@
   opacity: 0;
   transform: scale(0.5);
   transform-box: view-box;
-  transform-origin: 58px 34px;
+  /* View units, so this tracks HAND_TIP_X/Y rather than the rendered size. */
+  transform-origin: 134px 40px;
   transition: opacity 0.16s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

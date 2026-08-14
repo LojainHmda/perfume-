@@ -9,8 +9,14 @@ import { HAND_TIP_X, HAND_TIP_Y, HAND_VIEW_H, HAND_VIEW_W, LeatherHand } from '.
  * if the pointer capability changes — so mouse movement costs no reconciliation.
  */
 
-/** Rendered width in CSS pixels; height follows the artwork's aspect. */
-const SIZE_W = 66;
+/**
+ * Rendered width in CSS pixels; height follows the artwork's aspect.
+ *
+ * The photographed gauntlet is a taller crop than the drawing it replaced
+ * (444x814 against 180x260), so the width comes down to keep the cursor's
+ * on-screen footprint where it was — about 99px tall rather than 121.
+ */
+const SIZE_W = 54;
 const SIZE_H = (SIZE_W * HAND_VIEW_H) / HAND_VIEW_W;
 
 /** Distance from the element's top-left corner to the drawn fingertip. */
