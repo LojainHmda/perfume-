@@ -7,6 +7,10 @@ coverage/
 .env*
 !.env.example
 
-# Runtime content written by the admin panel
+# The admin's live working store. The deployable copy of it is
+# public/content.json, written by `npm run snapshot` and committed.
 data/content.json
-public/uploads/
+
+# public/uploads/ is deliberately NOT ignored: GitHub Pages has no API and no
+# disk of its own, so anything the admin uploaded has to be committed to reach
+# the deployed site at all.
