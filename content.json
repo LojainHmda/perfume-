@@ -1,0 +1,305 @@
+{
+  "products": [
+    {
+      "id": "dance-with-the-devil",
+      "name": "Dance with the Devil",
+      "subtitle": "CHECKMATE",
+      "collection": "The Grandmaster Series",
+      "moveNotation": "01 · E4",
+      "chapterQuote": "Indulgence at first contact.",
+      "concentration": "Extrait de Parfum",
+      "presentation": "float",
+      "tagline": "A provocative game of dark cherry, smoked oud, and forbidden velvet.",
+      "price50ml": 240,
+      "price100ml": 380,
+      "image": "/brand/dance_with_the_devil_cut.png",
+      "colorTheme": "#8B0000",
+      "accentGlow": "rgba(139, 0, 0, 0.4)",
+      "bgGradient": "from-black via-[#120406] to-[#0a0002]",
+      "description": "An unapologetic olfactory masterpiece designed for those who command the room. Dance with the Devil opens with an intoxicating rush of black cherry drenched in vintage cognac, descending into a dark heart of smoked patchouli and velvet suede.",
+      "story": "Born from a midnight challenge in an underground Parisian parlor, this fragrance defies traditional perfumery rules. It couples sweet sin with deep woody authority, creating an intoxicating trail that lingers like a tactical checkmate.",
+      "inspiration": "The thrill of high-stakes tension; the shadow cast by an obsidian chess piece beneath a single spotlight.",
+      "mood": "Seductive, Dominant, Mysterious, Unforgettable",
+      "seasonality": [
+        "Autumn",
+        "Winter",
+        "Nocturnal Evenings"
+      ],
+      "longevity": "14+ Hours (Haute Concentration)",
+      "sillage": "Enveloping & Hypnotic",
+      "topNotes": [
+        "Black Cherry Liquer",
+        "Crushed Pink Pepper",
+        "Vintage Cognac Accord"
+      ],
+      "heartNotes": [
+        "Smoked Oud Wood",
+        "Turkish Rose Absolute",
+        "Midnight Patchouli"
+      ],
+      "baseNotes": [
+        "Bourbon Vanilla Bean",
+        "Raw Leather",
+        "Smoked Amber & Musk"
+      ],
+      "gridPanels": [
+        {
+          "id": "panel-1",
+          "title": "Dark Cherry & Cognac",
+          "subtitle": "The Seductive Opening",
+          "category": "Ingredient",
+          "description": "Hand-harvested dark cherries soaked in aged French oak cognac barrels, yielding a rich liquorice sweetness.",
+          "videoType": "ruby_essence",
+          "overlayQuote": "Indulgence at first contact."
+        },
+        {
+          "id": "panel-2",
+          "title": "Smoked Oud Bark",
+          "subtitle": "The Olfactory Spine",
+          "category": "Fragrance Note",
+          "description": "A rare 30-year wild Cambodian oud resin, slowly steam-distilled to extract intense woody warmth.",
+          "videoType": "crimson_smoke",
+          "overlayQuote": "Uncompromising strength."
+        },
+        {
+          "id": "panel-3",
+          "title": "Tactical Temptation",
+          "subtitle": "The Psychological State",
+          "category": "Emotion",
+          "description": "The electrifying quiet right before making the final decisive move on the board.",
+          "videoType": "noir_ripples",
+          "overlayQuote": "Control is the ultimate aphrodisiac."
+        },
+        {
+          "id": "panel-4",
+          "title": "Midnight Checkmate",
+          "subtitle": "The Aesthetic Vision",
+          "category": "Inspiration",
+          "description": "Obsidian ceramic reflection under dim spotlighting, celebrating bold rebellion and quiet triumph.",
+          "videoType": "chess_monochrome",
+          "overlayQuote": "Checkmate."
+        }
+      ],
+      "engravingAvailable": true,
+      "sampleAvailable": true,
+      "mediaPanels": []
+    },
+    {
+      "id": "fire-in-the-hole",
+      "name": "Fire in the Hole",
+      "subtitle": "CHECKMATE",
+      "collection": "The Grandmaster Series",
+      "moveNotation": "02 · F5",
+      "chapterQuote": "Heat arrives first.",
+      "concentration": "Extrait de Parfum",
+      "presentation": "float",
+      "tagline": "A detonation of black pepper, smouldering incense, and molten amber.",
+      "price50ml": 230,
+      "price100ml": 360,
+      "image": "/brand/fire_in_the_hole_2_cut.png",
+      "colorTheme": "#C1440E",
+      "accentGlow": "rgba(193, 68, 14, 0.4)",
+      "bgGradient": "from-black via-[#140803] to-[#0a0301]",
+      "description": "A fragrance built on controlled combustion. Fire in the Hole opens on a blast of crushed black pepper and pink chili, settling into a smouldering heart of frankincense and charred cedar before a molten amber base takes hold.",
+      "story": "Named for the split second before the fuse reaches its end. Housed in the obsidian Grandmaster silhouette, it turns heat into strategy—loud on arrival, calculated in the drydown.",
+      "inspiration": "Gunpowder smoke drifting over a polished black chess piece under a single hard spotlight.",
+      "mood": "Explosive, Commanding, Spiced, Unapologetic",
+      "seasonality": [
+        "Autumn",
+        "Winter",
+        "Nocturnal Evenings"
+      ],
+      "longevity": "12+ Hours (Haute Concentration)",
+      "sillage": "Radiant & Combustive",
+      "topNotes": [
+        "Crushed Black Pepper",
+        "Pink Chili Accord",
+        "Blood Orange Zest"
+      ],
+      "heartNotes": [
+        "Somali Frankincense",
+        "Charred Cedarwood",
+        "Smoked Cardamom"
+      ],
+      "baseNotes": [
+        "Molten Amber",
+        "Burnt Tonka Bean",
+        "Black Leather Musk"
+      ],
+      "gridPanels": [
+        {
+          "id": "panel-1",
+          "title": "Crushed Black Pepper",
+          "subtitle": "The Ignition",
+          "category": "Ingredient",
+          "description": "Malabar peppercorns cracked at the moment of blending, releasing a dry volatile heat that hits before anything else.",
+          "videoType": "crimson_smoke",
+          "overlayQuote": "Heat arrives first."
+        },
+        {
+          "id": "panel-2",
+          "title": "Somali Frankincense",
+          "subtitle": "The Smouldering Heart",
+          "category": "Fragrance Note",
+          "description": "Hand-tapped resin tears burned low and slow, lending a sacred smoke that carries the spice without dulling it.",
+          "videoType": "noir_ripples",
+          "overlayQuote": "Smoke that refuses to clear."
+        },
+        {
+          "id": "panel-3",
+          "title": "Controlled Detonation",
+          "subtitle": "The Psychological State",
+          "category": "Emotion",
+          "description": "The composure of knowing exactly when to strike—and holding the match a beat longer than anyone expects.",
+          "videoType": "ruby_essence",
+          "overlayQuote": "Power is timing."
+        },
+        {
+          "id": "panel-4",
+          "title": "Obsidian Grandmaster",
+          "subtitle": "The Aesthetic Vision",
+          "category": "Inspiration",
+          "description": "The lacquered black vessel absorbing every point of light, gold lettering the only thing permitted to shine.",
+          "videoType": "chess_monochrome",
+          "overlayQuote": "Checkmate."
+        }
+      ],
+      "engravingAvailable": true,
+      "sampleAvailable": true
+    },
+    {
+      "id": "fire-in-the-hole-2",
+      "name": "Fire in the Hole II",
+      "subtitle": "CHECKMATE 2",
+      "collection": "The Grandmaster Series",
+      "moveNotation": "03 · G7",
+      "chapterQuote": "Warmth without weakness.",
+      "concentration": "Extrait de Parfum",
+      "presentation": "float",
+      "tagline": "The second move—warm saffron, golden resin, and polished suede.",
+      "price50ml": 250,
+      "price100ml": 395,
+      "image": "/brand/fire_in_the_hole_2_cut.png",
+      "colorTheme": "#D4AF37",
+      "accentGlow": "rgba(212, 175, 55, 0.4)",
+      "bgGradient": "from-black via-[#12100a] to-[#080703]",
+      "description": "The counterpart composition. Where the first burns, the second glows: saffron and toasted nutmeg over a golden resin heart, finished with polished suede and a long amber trail.",
+      "story": "A sequel written in warmer ink. Same obsidian silhouette, softer light—the follow-up move made once the board has already been claimed.",
+      "inspiration": "The same black bottle photographed against pale studio light, casting one long deliberate shadow.",
+      "mood": "Warm, Refined, Assured, Magnetic",
+      "seasonality": [
+        "Autumn",
+        "Winter",
+        "All Seasons"
+      ],
+      "longevity": "14+ Hours (Haute Concentration)",
+      "sillage": "Warm & Enveloping",
+      "topNotes": [
+        "Persian Saffron",
+        "Toasted Nutmeg",
+        "Bergamot Rind"
+      ],
+      "heartNotes": [
+        "Golden Labdanum",
+        "Orris Butter",
+        "Honeyed Tobacco Leaf"
+      ],
+      "baseNotes": [
+        "Polished Suede",
+        "Amber Resin",
+        "Cashmere Woods"
+      ],
+      "gridPanels": [
+        {
+          "id": "panel-1",
+          "title": "Persian Saffron",
+          "subtitle": "The Golden Opening",
+          "category": "Ingredient",
+          "description": "Hand-picked threads yielding a leathery warmth worth more per gram than the gold on the bottle.",
+          "videoType": "golden_suede",
+          "overlayQuote": "Worth its weight."
+        },
+        {
+          "id": "panel-2",
+          "title": "Honeyed Tobacco Leaf",
+          "subtitle": "The Amber Core",
+          "category": "Fragrance Note",
+          "description": "Cured leaf steeped in raw honey and labdanum, giving the composition its slow golden burn.",
+          "videoType": "raw_honey",
+          "overlayQuote": "Warmth without weakness."
+        },
+        {
+          "id": "panel-3",
+          "title": "The Second Move",
+          "subtitle": "The Psychological State",
+          "category": "Emotion",
+          "description": "Confidence after the fact—no need to raise your voice when the position is already won.",
+          "videoType": "white_velvet",
+          "overlayQuote": "Quiet after the strike."
+        },
+        {
+          "id": "panel-4",
+          "title": "Light on Obsidian",
+          "subtitle": "The Aesthetic Vision",
+          "category": "Inspiration",
+          "description": "A pale studio backdrop turning the black vessel into pure sculpted contour and shadow.",
+          "videoType": "chess_monochrome",
+          "overlayQuote": "Checkmate."
+        }
+      ],
+      "engravingAvailable": true,
+      "sampleAvailable": true
+    }
+  ],
+  "settings": {
+    "heroImage": null,
+    "heroVideo": null,
+    "heroEyebrow": null,
+    "heroHeadline": null,
+    "heroTagline": null,
+    "heroCta": null,
+    "heroFooterNotes": null,
+    "compositionsRevealLabel": null,
+    "compositionsEnterLabel": null,
+    "collectionBackground": "/uploads/screenshot-2026-08-14-094553-2526858ce20d.png",
+    "collectionEyebrow": null,
+    "collectionHeadline": null,
+    "collectionSlides": [
+      {
+        "id": "default-1",
+        "src": "/uploads/screenshot-2026-08-14-103222-b8b60a885d14.png",
+        "alt": "Dance With The Devil",
+        "productId": "dance-with-the-devil"
+      },
+      {
+        "id": "default-2",
+        "src": "/uploads/gemini-generated-image-hnjhqkhnjhqkhnjh-b18eb10bd57c.jpg",
+        "alt": "Fire In The Hole",
+        "productId": "fire-in-the-hole"
+      },
+      {
+        "id": "default-3",
+        "src": "/uploads/screenshot-2026-08-14-103932-301bbf2b9f29.png",
+        "alt": "Fire In The Hole II",
+        "productId": "fire-in-the-hole-2"
+      }
+    ],
+    "manifestoPhrases": null,
+    "mosaicHeadline": null,
+    "mosaicNotation": null,
+    "mosaicCta": null,
+    "mosaicSlides": null,
+    "archiveHeadline": null,
+    "archiveNotation": null,
+    "archiveCta": null,
+    "archiveCards": null,
+    "newsletterEyebrow": null,
+    "newsletterHeadline": null,
+    "newsletterBody": null,
+    "newsletterPlaceholder": null,
+    "newsletterCta": null,
+    "sectionOrder": null,
+    "hiddenSections": null
+  },
+  "updatedAt": "2026-08-14T09:04:14.711Z"
+}
