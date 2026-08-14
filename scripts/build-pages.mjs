@@ -17,18 +17,30 @@ import path from 'path';
  */
 const ROOT = process.cwd();
 
-const run = (command, args, env) => {
-  const result = spawnSync(command, args, {
+/**
+ * Always run the real JS entry point on this node, never a shell.
+ *
+ * `npx vite build` with shell:true on Windows completed the build and then sat
+ * there: the cmd wrapper stayed alive after vite exited and spawnSync waited on
+ * it. Resolving the bin ourselves removes the wrapper, and with it the hang.
+ */
+const run = (script, args, env) => {
+  const result = spawnSync(process.execPath, [script, ...args], {
     stdio: 'inherit',
-    shell: process.platform === 'win32',
     env: { ...process.env, ...env },
     cwd: ROOT,
   });
   if (result.status !== 0) process.exit(result.status ?? 1);
 };
 
-run('node', ['scripts/snapshot-content.mjs']);
-run('npx', ['vite', 'build'], { GITHUB_PAGES: 'true' });
+const VITE_BIN = path.join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js');
+if (!fs.existsSync(VITE_BIN)) {
+  console.error('[pages] vite is not installed — run npm install first.');
+  process.exit(1);
+}
+
+run(path.join(ROOT, 'scripts', 'snapshot-content.mjs'), []);
+run(VITE_BIN, ['build'], { GITHUB_PAGES: 'true' });
 
 // A static host has no router: it looks for a file at the requested path and
 // serves 404.html when there isn't one. Making that the app shell is what lets
