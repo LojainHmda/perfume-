@@ -1,14 +1,21 @@
 import React from 'react';
 
-const PHRASE = ['Born of strategy', 'Worn as intent', 'Every scent is a move'];
+interface ManifestoBandProps {
+  phrases: string[];
+}
 
 /**
  * The page's heartbeat: a slow band of didone caps drifting between the opening
  * and the collection. It carries the house line without asking for a click.
  */
-export const ManifestoBand: React.FC = () => {
-  // Rendered twice so the -50% translation loops seamlessly.
-  const run = [...PHRASE, ...PHRASE, ...PHRASE];
+export const ManifestoBand: React.FC<ManifestoBandProps> = ({ phrases }) => {
+  // An emptied list is a deliberate "show nothing", and a band of nothing is a
+  // rule across the page rather than a section.
+  if (phrases.length === 0) return null;
+
+  // Rendered three times so the -50% translation loops seamlessly however few
+  // phrases the admin left in.
+  const run = [...phrases, ...phrases, ...phrases];
 
   return (
     <section

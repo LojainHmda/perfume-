@@ -19,6 +19,14 @@ interface MediaListFieldProps {
    */
   linkOptions?: { value: string; label: string }[];
   linkLabel?: string;
+  /**
+   * Show the copy each row can carry over its plate — an overline, a title and
+   * a free-form destination. What separates a `cards` track from a `slides`
+   * one; the row shape is the same either way.
+   */
+  withCopy?: boolean;
+  /** What one row is called, for the buttons' accessible names. */
+  itemNoun?: string;
   onError?: (message: string) => void;
 }
 
@@ -40,6 +48,8 @@ export const MediaListField: React.FC<MediaListFieldProps> = ({
   addLabel = 'Add image',
   linkOptions,
   linkLabel = 'Links to',
+  withCopy = false,
+  itemNoun = 'image',
   onError,
 }) => {
   const replace = (index: number, patch: Partial<MediaSlide>) =>
@@ -97,7 +107,7 @@ export const MediaListField: React.FC<MediaListFieldProps> = ({
                     type="button"
                     onClick={() => move(index, -1)}
                     disabled={index === 0}
-                    aria-label={`Move image ${index + 1} up`}
+                    aria-label={`Move ${itemNoun} ${index + 1} up`}
                     className="cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 p-1.5 text-zinc-400 transition-colors hover:text-white disabled:opacity-30"
                   >
                     <ArrowUp className="h-3.5 w-3.5" />
@@ -106,7 +116,7 @@ export const MediaListField: React.FC<MediaListFieldProps> = ({
                     type="button"
                     onClick={() => move(index, 1)}
                     disabled={index === slides.length - 1}
-                    aria-label={`Move image ${index + 1} down`}
+                    aria-label={`Move ${itemNoun} ${index + 1} down`}
                     className="cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 p-1.5 text-zinc-400 transition-colors hover:text-white disabled:opacity-30"
                   >
                     <ArrowDown className="h-3.5 w-3.5" />
@@ -114,7 +124,7 @@ export const MediaListField: React.FC<MediaListFieldProps> = ({
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    aria-label={`Remove image ${index + 1}`}
+                    aria-label={`Remove ${itemNoun} ${index + 1}`}
                     className="cursor-pointer rounded-lg border border-zinc-800 bg-zinc-900 p-1.5 text-zinc-400 transition-colors hover:text-red-400"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -123,14 +133,43 @@ export const MediaListField: React.FC<MediaListFieldProps> = ({
               </div>
 
               <MediaField
-                label={`Image ${index + 1}`}
+                label={`${itemNoun.charAt(0).toUpperCase()}${itemNoun.slice(1)} ${index + 1}`}
                 value={slide.src}
                 onChange={(url) => replace(index, { src: url })}
                 accept={accept}
-                hint="Shown in the scrolling column, in this order."
-                emptyLabel="Empty — this slot is skipped when you save."
+                hint="Shown on the storefront in this order."
+                emptyLabel={
+                  withCopy
+                    ? 'Empty — the entry shows its copy over a plain ground.'
+                    : 'Empty — this slot is skipped when you save.'
+                }
+                // The row already knows which product it is showing, so the
+                // thumbnail is the shortest way to that product's editor.
+                previewHref={
+                  slide.productId ? `/admin/products/${slide.productId}/details` : undefined
+                }
+                previewLabel="Edit this product"
                 onError={onError}
               />
+
+              {withCopy && (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <TextField
+                    label="Overline"
+                    value={slide.eyebrow ?? ''}
+                    onChange={(value) => replace(index, { eyebrow: value })}
+                    placeholder="Archive — I"
+                    hint="Small caps above the title."
+                  />
+                  <TextField
+                    label="Title"
+                    value={slide.title ?? ''}
+                    onChange={(value) => replace(index, { title: value })}
+                    placeholder="Why the board was chosen"
+                    hint="Set over the lower left of the plate."
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {linkOptions && (
@@ -140,17 +179,28 @@ export const MediaListField: React.FC<MediaListFieldProps> = ({
                     onChange={(value) => replace(index, { productId: value || null })}
                     options={linkOptions}
                     placeholder="— Not linked —"
-                    hint="Where clicking this image takes the visitor."
+                    hint="Where clicking this takes the visitor."
                   />
                 )}
 
-                <TextField
-                  label="Alt text"
-                  value={slide.alt ?? ''}
-                  onChange={(value) => replace(index, { alt: value })}
-                  placeholder="Dance With The Devil"
-                  hint="Blank uses the linked product's name."
-                />
+                {withCopy ? (
+                  <TextField
+                    label="Or a path"
+                    value={slide.href ?? ''}
+                    onChange={(value) => replace(index, { href: value })}
+                    placeholder="/story"
+                    mono
+                    hint="Used when no product is linked."
+                  />
+                ) : (
+                  <TextField
+                    label="Alt text"
+                    value={slide.alt ?? ''}
+                    onChange={(value) => replace(index, { alt: value })}
+                    placeholder="Dance With The Devil"
+                    hint="Blank uses the linked product's name."
+                  />
+                )}
               </div>
             </li>
           ))}

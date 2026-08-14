@@ -260,7 +260,7 @@ export const CollectionFilmstrip: React.FC<CollectionFilmstripProps> = ({
           aria-label={`${headline} — scroll to browse`}
           // pan-y keeps a touch swipe scrolling the page: the wheel and drag
           // handlers are mouse-only, so touch never loses the page scroll.
-          className="absolute right-[var(--rhythm-2)] top-0 z-[5] h-full w-[min(38vw,13rem)] touch-pan-y overflow-hidden sm:right-[var(--rhythm-3)] lg:w-[min(20vw,15rem)]"
+          className="absolute right-[var(--rhythm-2)] top-0 z-[5] h-full w-[min(46vw,17rem)] touch-pan-y overflow-hidden sm:right-[var(--rhythm-3)] lg:w-[min(26vw,21rem)]"
         >
           <div ref={trackRef} className="will-change-transform">
             {Array.from({ length: sets }, (_, set) =>

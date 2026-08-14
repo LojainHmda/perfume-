@@ -35,11 +35,24 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit, onDel
         </div>
 
         <div className="flex items-center gap-4 rounded-xl border border-zinc-800/60 bg-zinc-900/60 p-3">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="h-16 w-16 rounded-lg border border-zinc-800 bg-black/40 object-contain p-1"
-          />
+          {/* The photograph is the fastest handle on a product, so it opens the
+              editor rather than sitting there as decoration beside a button
+              that does the same thing. */}
+          <button
+            type="button"
+            onClick={() => onEdit(product)}
+            aria-label={`Edit ${product.name}`}
+            className="group/thumb relative shrink-0 cursor-pointer rounded-lg border border-zinc-800 bg-black/40 transition-colors hover:border-amber-500/60"
+          >
+            <img
+              src={product.image}
+              alt={product.name}
+              className="h-16 w-16 rounded-lg object-contain p-1"
+            />
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg bg-black/60 opacity-0 transition-opacity group-hover/thumb:opacity-100 group-focus-visible/thumb:opacity-100">
+              <Edit className="h-4 w-4 text-amber-300" />
+            </span>
+          </button>
           <div className="space-y-1 font-mono text-xs">
             <div className="text-zinc-400">
               <span className="text-zinc-500">50ML:</span>{' '}

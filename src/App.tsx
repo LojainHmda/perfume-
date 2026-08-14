@@ -9,8 +9,8 @@ import { FragranceDetailPage } from './pages/FragranceDetailPage';
 import { StoryPage } from './pages/StoryPage';
 import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminOverviewPage } from './pages/admin/AdminOverviewPage';
-import { HeroSettingsPage } from './pages/admin/HeroSettingsPage';
-import { CollectionSettingsPage } from './pages/admin/CollectionSettingsPage';
+import { SectionSettingsPage } from './pages/admin/SectionSettingsPage';
+import { PageLayoutPage } from './pages/admin/PageLayoutPage';
 import { ProductsPage } from './pages/admin/ProductsPage';
 import { MediaLibraryPage } from './pages/admin/MediaLibraryPage';
 import { ProductEditorPage } from './pages/admin/product/ProductEditorPage';
@@ -49,11 +49,23 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/fragrance/:id" element={<FragranceDetailPage />} />
             <Route path="/story" element={<StoryPage />} />
-            {/* The admin is a section, not a page: one route per surface. */}
+            {/* The admin is a section, not a page: one route per surface. Every
+                home page section shares a single route, resolved by id against
+                the registry, so describing a section is all it takes to reach
+                its editor. */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminOverviewPage />} />
-              <Route path="hero" element={<HeroSettingsPage />} />
-              <Route path="collection" element={<CollectionSettingsPage />} />
+              <Route path="section/:sectionId" element={<SectionSettingsPage />} />
+              <Route path="layout" element={<PageLayoutPage />} />
+
+              {/* The two surfaces that had their own routes before the registry.
+                  Kept so existing bookmarks still land somewhere useful. */}
+              <Route path="hero" element={<Navigate to="/admin/section/hero" replace />} />
+              <Route
+                path="collection"
+                element={<Navigate to="/admin/section/filmstrip" replace />}
+              />
+
               <Route path="media" element={<MediaLibraryPage />} />
               <Route path="products" element={<ProductsPage />} />
 

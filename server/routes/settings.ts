@@ -1,5 +1,5 @@
 import { Router } from "express";
-import type { MediaSlide, SiteSettings } from "../../src/types/settings";
+import type { MediaSlide, SettingKind, SiteSettings } from "../../src/types/settings";
 import { MAX_SLIDES, SETTING_KINDS } from "../../src/types/settings";
 import { requireAdmin } from "../lib/auth";
 import { EMPTY_SETTINGS, mutateStore, readStore } from "../lib/db";
@@ -13,31 +13,73 @@ const cleanText = (value: unknown): string | null =>
   typeof value === "string" && value.trim() !== "" ? value.trim() : null;
 
 /**
- * A media track. Slides without a source are dropped rather than rejected — a
+ * An ordered list of plain strings — manifesto phrases, hero notation, and the
+ * layout keys. Blank entries are dropped the same way blank track rows are.
+ */
+const cleanLines = (value: unknown): string[] | null => {
+  if (!Array.isArray(value)) return null;
+  return value
+    .slice(0, MAX_SLIDES)
+    .map(cleanText)
+    .filter((line): line is string => line !== null);
+};
+
+/**
+ * A media track. Rows carrying nothing are dropped rather than rejected — a
  * half-filled row in the panel is a work in progress, not a bad request. `null`
  * still means "no override"; an empty array is a deliberate "show nothing".
+ *
+ * `cards` rows keep the copy a plain `slides` row has no use for, and they
+ * survive without artwork: an archive entry is a title and a door first, and
+ * the plate behind it is optional.
  */
-const cleanSlides = (value: unknown): MediaSlide[] | null => {
+const cleanTrack = (value: unknown, kind: SettingKind): MediaSlide[] | null => {
   if (!Array.isArray(value)) return null;
+  const isCards = kind === "cards";
 
   const slides: MediaSlide[] = [];
   value.slice(0, MAX_SLIDES).forEach((entry, index) => {
     if (typeof entry !== "object" || entry === null) return;
-    const src = cleanText((entry as MediaSlide).src);
-    if (!src) return;
-    const id = cleanText((entry as MediaSlide).id) ?? `slide-${index + 1}`;
-    slides.push({
+    const row = entry as MediaSlide;
+    const src = cleanText(row.src);
+    const title = cleanText(row.title);
+    if (!src && !(isCards && title)) return;
+
+    const id = cleanText(row.id) ?? `slide-${index + 1}`;
+    const slide: MediaSlide = {
       id,
-      src,
-      alt: cleanText((entry as MediaSlide).alt),
+      src: src ?? "",
+      alt: cleanText(row.alt),
       // Not checked against the catalogue here: products can be added, renamed
       // or removed independently, so the storefront resolves the link at render
       // and simply leaves the slide inert when the id no longer exists.
-      productId: cleanText((entry as MediaSlide).productId),
-    });
+      productId: cleanText(row.productId),
+    };
+
+    if (isCards) {
+      slide.eyebrow = cleanText(row.eyebrow);
+      slide.title = title;
+      slide.href = cleanText(row.href);
+    }
+
+    slides.push(slide);
   });
 
   return slides;
+};
+
+/** Route a value to the sanitiser its declared kind calls for. */
+const cleanByKind = (value: unknown, kind: SettingKind) => {
+  switch (kind) {
+    case "slides":
+    case "cards":
+      return cleanTrack(value, kind);
+    case "lines":
+    case "ids":
+      return cleanLines(value);
+    default:
+      return cleanText(value);
+  }
 };
 
 settingsRouter.get("/", (_req, res) => {
@@ -62,7 +104,7 @@ settingsRouter.patch("/", requireAdmin, (req, res) => {
       const value = (patch as Record<string, unknown>)[key];
       draft.settings = {
         ...draft.settings,
-        [key]: SETTING_KINDS[key] === "slides" ? cleanSlides(value) : cleanText(value),
+        [key]: cleanByKind(value, SETTING_KINDS[key]),
       };
     }
   });

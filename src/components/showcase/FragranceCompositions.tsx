@@ -7,6 +7,10 @@ import { useCursorStore } from '../../store/useStore';
 interface FragranceCompositionsProps {
   fragrances: Fragrance[];
   onOpen: (fragrance: Fragrance) => void;
+  /** What the custom cursor reads while a panel is under it. */
+  revealLabel: string;
+  /** The invitation that surfaces once the bottle has risen. */
+  enterLabel: string;
 }
 
 const REVEAL = [0.16, 1, 0.3, 1] as const;
@@ -32,21 +36,35 @@ const useHoverCapable = () => {
  * a second, no bounce. Panels are full-bleed and unbordered; the only thing
  * separating them is that each is lit differently.
  */
-export const FragranceCompositions: React.FC<FragranceCompositionsProps> = ({ fragrances, onOpen }) => (
+export const FragranceCompositions: React.FC<FragranceCompositionsProps> = ({
+  fragrances,
+  onOpen,
+  revealLabel,
+  enterLabel,
+}) => (
   <section id="collection" className="relative w-full bg-obsidian" aria-label="The collection">
     <div className="grid grid-cols-1 lg:grid-cols-3">
       {fragrances.map((fragrance, i) => (
-        <Composition key={fragrance.id} fragrance={fragrance} index={i} onOpen={onOpen} />
+        <Composition
+          key={fragrance.id}
+          fragrance={fragrance}
+          index={i}
+          onOpen={onOpen}
+          revealLabel={revealLabel}
+          enterLabel={enterLabel}
+        />
       ))}
     </div>
   </section>
 );
 
-const Composition: React.FC<{ fragrance: Fragrance; index: number; onOpen: (f: Fragrance) => void }> = ({
-  fragrance,
-  index,
-  onOpen,
-}) => {
+const Composition: React.FC<{
+  fragrance: Fragrance;
+  index: number;
+  onOpen: (f: Fragrance) => void;
+  revealLabel: string;
+  enterLabel: string;
+}> = ({ fragrance, index, onOpen, revealLabel, enterLabel }) => {
   const { setCursor, resetCursor } = useCursorStore();
   const hoverCapable = useHoverCapable();
   const [hovered, setHovered] = useState(false);
@@ -76,7 +94,7 @@ const Composition: React.FC<{ fragrance: Fragrance; index: number; onOpen: (f: F
       ref={ref}
       onMouseEnter={() => {
         setHovered(true);
-        setCursor('REVEAL', 'magnetic');
+        setCursor(revealLabel, 'magnetic');
       }}
       onMouseLeave={() => {
         setHovered(false);
@@ -212,7 +230,7 @@ const Composition: React.FC<{ fragrance: Fragrance; index: number; onOpen: (f: F
           transition={{ duration: 0.7, ease: REVEAL, delay: revealed ? 0.25 : 0 }}
           className="mt-3 flex items-center gap-3"
         >
-          <span className="eyebrow text-porcelain">Enter</span>
+          <span className="eyebrow text-porcelain">{enterLabel}</span>
           <span className="h-px w-10 bg-[color:var(--accent-type)]" />
         </motion.span>
       </div>

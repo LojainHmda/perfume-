@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Loader2, Trash2, Upload } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Loader2, SquarePen, Trash2, Upload } from 'lucide-react';
 import { apiUpload } from '../../../api/client';
 import { isVideoUrl } from '../../../utils/media';
 
@@ -12,6 +13,18 @@ interface MediaFieldProps {
   hint?: string;
   /** What the storefront shows while this stays empty. */
   emptyLabel?: string;
+  /**
+   * Where clicking the preview goes — the editor for the product this slot
+   * shows. Omitted, the preview is a picture and nothing more.
+   *
+   * The picture an admin recognises is the fastest way back to the record
+   * behind it, so wherever a slot knows which product it is displaying, the
+   * thumbnail becomes the door to that product's editor rather than a dead end
+   * that has to be traced back through the catalogue by name.
+   */
+  previewHref?: string;
+  /** Tooltip and accessible name for that link. */
+  previewLabel?: string;
   onError?: (message: string) => void;
 }
 
@@ -29,6 +42,8 @@ export const MediaField: React.FC<MediaFieldProps> = ({
   accept = 'image/*,video/*',
   hint,
   emptyLabel = 'Empty — the built-in default is shown.',
+  previewHref,
+  previewLabel = 'Open this product',
   onError,
 }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -67,8 +82,8 @@ export const MediaField: React.FC<MediaFieldProps> = ({
       </div>
 
       <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-[9rem_1fr]">
-        {/* Preview */}
-        <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-black">
+        {/* Preview. A link when the slot knows the product it is showing. */}
+        <PreviewShell href={previewHref} label={previewLabel}>
           {value ? (
             isVideo ? (
               <video src={value} className="h-full w-full object-cover" muted loop autoPlay playsInline />
@@ -86,7 +101,7 @@ export const MediaField: React.FC<MediaFieldProps> = ({
               <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
             </div>
           )}
-        </div>
+        </PreviewShell>
 
         {/* Controls */}
         <div className="space-y-2">
@@ -115,5 +130,39 @@ export const MediaField: React.FC<MediaFieldProps> = ({
         </div>
       </div>
     </div>
+  );
+};
+
+/**
+ * The framed preview box, as a link or as a plain div.
+ *
+ * Written as one component taking an optional href rather than two branches at
+ * the call site so the frame's styling — which every panel's sense of rhythm
+ * depends on — is written once.
+ */
+const PreviewShell: React.FC<{
+  href?: string;
+  label: string;
+  children: React.ReactNode;
+}> = ({ href, label, children }) => {
+  const shell =
+    'relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border border-zinc-800 bg-black';
+
+  if (!href) return <div className={shell}>{children}</div>;
+
+  return (
+    <Link
+      to={href}
+      title={label}
+      aria-label={label}
+      className={`group ${shell} cursor-pointer transition-colors hover:border-amber-500/60`}
+    >
+      {children}
+      {/* Only surfaces on approach: at rest the row should read as photographs,
+          not as a grid of buttons. */}
+      <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+        <SquarePen className="h-4 w-4 text-amber-300" />
+      </span>
+    </Link>
   );
 };

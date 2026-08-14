@@ -1,11 +1,16 @@
 import React from 'react';
 import { Fragrance } from '../../types/fragrance';
 import { useCursorStore } from '../../store/useStore';
-import { useSettingsStore } from '../../store/useSettingsStore';
-import defaultHeroPlate from '../../assets/images/Gemini_Generated_Image_ikb336ikb336ikb3.png';
+import type { SiteContent } from '../../hooks/useSiteContent';
 
 interface CampaignHeroProps {
+  /**
+   * The feature product, which still supplies the copy the admin has not
+   * overridden: a headline left blank should read as the product's name rather
+   * than as a house string that has to be kept in step with the catalogue.
+   */
   feature: Fragrance;
+  content: SiteContent;
   onDiscover: () => void;
 }
 
@@ -21,16 +26,19 @@ interface CampaignHeroProps {
  * Deliberately static: no parallax, no scroll transform, no entrance animation.
  * The only motion is the hover rule under the call to action.
  */
-export const CampaignHero: React.FC<CampaignHeroProps> = ({ feature, onDiscover }) => {
+export const CampaignHero: React.FC<CampaignHeroProps> = ({ feature, content, onDiscover }) => {
   const { setCursor, resetCursor } = useCursorStore();
-  const settings = useSettingsStore((state) => state.settings);
 
-  // Anything the admin set wins; anything left empty keeps what ships.
-  const plate = settings.heroImage || defaultHeroPlate;
-  const film = settings.heroVideo;
-  const eyebrow = settings.heroEyebrow || `${feature.moveNotation ?? 'The opening'} — ${feature.collection}`;
-  const headline = settings.heroHeadline || feature.name;
-  const tagline = settings.heroTagline || feature.tagline;
+  // Anything the admin set wins. Media and copy that stay empty fall back to
+  // the registry's shipped value; the three lines below fall further, to the
+  // feature product, because their default is catalogue data rather than copy.
+  const plate = content.text('heroImage');
+  const film = content.text('heroVideo');
+  const eyebrow =
+    content.text('heroEyebrow') || `${feature.moveNotation ?? 'The opening'} — ${feature.collection}`;
+  const headline = content.text('heroHeadline') || feature.name;
+  const tagline = content.text('heroTagline') || feature.tagline;
+  const footerNotes = content.lines('heroFooterNotes');
 
   const surfaceClass =
     'absolute inset-0 h-full w-full object-cover object-[62%_center] sm:object-[56%_center] lg:object-center';
@@ -87,7 +95,7 @@ export const CampaignHero: React.FC<CampaignHeroProps> = ({ feature, onDiscover 
             onMouseLeave={resetCursor}
             className="group mt-8 inline-flex w-fit items-center gap-4"
           >
-            <span className="eyebrow text-porcelain">Enter the collection</span>
+            <span className="eyebrow text-porcelain">{content.text('heroCta')}</span>
             <span className="h-px w-14 bg-porcelain transition-all duration-500 group-hover:w-24" />
           </button>
         </div>
@@ -96,13 +104,11 @@ export const CampaignHero: React.FC<CampaignHeroProps> = ({ feature, onDiscover 
       {/* ---- The handover into the collection ---- */}
       <div className="absolute inset-x-0 bottom-0 z-30 border-t border-[color:var(--border-subtle)] bg-obsidian/70 px-6 py-4 backdrop-blur-sm sm:px-10 lg:px-16">
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 sm:justify-between">
-          {['The Grandmaster Series', feature.concentration ?? 'Extrait de Parfum', 'Three compositions', 'One silhouette'].map(
-            (item) => (
-              <span key={item} className="notation text-ash">
-                {item}
-              </span>
-            )
-          )}
+          {footerNotes.map((item) => (
+            <span key={item} className="notation text-ash">
+              {item}
+            </span>
+          ))}
         </div>
       </div>
     </section>

@@ -4,12 +4,26 @@ import { useCursorStore } from '../../store/useStore';
 
 type Status = 'idle' | 'sending' | 'done' | 'error';
 
+interface NewsletterProps {
+  eyebrow: string;
+  headline: string;
+  body: string;
+  placeholder: string;
+  cta: string;
+}
+
 /**
  * Centred headline, one rule of an input, no box. The field is a line rather
  * than a form control — the section has to read as an invitation, not a signup
  * widget.
  */
-export const Newsletter: React.FC = () => {
+export const Newsletter: React.FC<NewsletterProps> = ({
+  eyebrow,
+  headline,
+  body,
+  placeholder,
+  cta,
+}) => {
   const { setCursor, resetCursor } = useCursorStore();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<Status>('idle');
@@ -43,16 +57,14 @@ export const Newsletter: React.FC = () => {
   return (
     <section
       className="w-full border-t border-[color:var(--border-subtle)] bg-obsidian px-6 py-24 sm:px-10 sm:py-28 lg:px-16"
-      aria-label="Correspondence"
+      aria-label={eyebrow}
     >
       <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-        <p className="notation text-ash">Correspondence</p>
+        <p className="notation text-ash">{eyebrow}</p>
         <h2 className="display mt-5 text-[clamp(1.8rem,4.4vw,3.2rem)] text-porcelain">
-          First to know, first to wear.
+          {headline}
         </h2>
-        <p className="mt-5 max-w-md text-sm leading-relaxed text-ash">
-          Openings, private commissions and the occasional note from the atelier. Nothing else.
-        </p>
+        <p className="mt-5 max-w-md text-sm leading-relaxed text-ash">{body}</p>
 
         <form onSubmit={submit} className="mt-10 flex w-full max-w-md items-end gap-4">
           <label className="flex-1 text-left">
@@ -62,18 +74,18 @@ export const Newsletter: React.FC = () => {
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="your@email.com"
+              placeholder={placeholder}
               className="w-full border-b border-[color:var(--border-subtle)] bg-transparent pb-3 text-sm text-porcelain outline-none transition-colors placeholder:text-ash/60 focus:border-[color:var(--accent-type)]"
             />
           </label>
           <button
             type="submit"
             disabled={status === 'sending'}
-            onMouseEnter={() => setCursor('SUBSCRIBE', 'button')}
+            onMouseEnter={() => setCursor(cta.toUpperCase(), 'button')}
             onMouseLeave={resetCursor}
             className="eyebrow border-b border-[color:var(--accent-type)] pb-3 text-porcelain transition-opacity hover:opacity-70 disabled:opacity-40"
           >
-            {status === 'sending' ? 'Sending' : 'Subscribe'}
+            {status === 'sending' ? 'Sending' : cta}
           </button>
         </form>
 
