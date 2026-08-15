@@ -59,7 +59,7 @@ export const EngravingModal: React.FC<EngravingModalProps> = ({
               src={fragrance.image}
               alt={fragrance.name}
               referrerPolicy="no-referrer"
-              className="h-48 object-contain filter drop-shadow-xl"
+              className="h-48 object-contain"
             />
             {engravingText && (
               <motion.div

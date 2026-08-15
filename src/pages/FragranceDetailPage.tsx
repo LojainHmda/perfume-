@@ -95,10 +95,13 @@ export const FragranceDetailPage: React.FC = () => {
                 <div className="relative flex h-[52vh] max-h-[38rem] min-h-[20rem] items-center justify-center">
                   <div aria-hidden className="absolute inset-x-[-15%] bottom-0 h-1/2 board-plane opacity-70" />
                   <div aria-hidden className="contact-shadow absolute inset-x-[12%] bottom-[6%] h-[14%]" />
+                  {/* Grounded by the contact shadow above, not by a drop-shadow:
+                      that filter reads the source's alpha, and an opaque upload
+                      has none, so it would shadow the photograph's rectangle. */}
                   <img
                     src={fragrance.image}
                     alt={fragrance.name}
-                    className="relative h-full w-auto object-contain drop-shadow-[0_45px_70px_rgba(0,0,0,0.9)]"
+                    className="relative h-full w-auto object-contain"
                   />
                 </div>
               )}

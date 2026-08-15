@@ -194,11 +194,16 @@ const Composition: React.FC<{
             transition={{ duration: 1.05, ease: REVEAL, delay: revealed ? 0.1 : 0 }}
             className="absolute flex h-full items-center justify-center"
           >
+            {/* No drop-shadow here. That filter traces the source's alpha, and
+                a bottle swapped in from the admin is very often an opaque JPG —
+                which has no silhouette to trace, so the shadow comes out as the
+                photograph's own rectangle. The contact shadow below grounds the
+                bottle instead, and it does not care what the file looks like. */}
             <img
               src={fragrance.image}
               alt=""
               loading="lazy"
-              className="h-full w-auto object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.9)]"
+              className="h-full w-auto object-contain"
             />
           </motion.div>
         )}

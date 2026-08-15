@@ -93,7 +93,7 @@ export const CartDrawer: React.FC = () => {
                       <img
                         src={item.fragrance.image}
                         alt={item.fragrance.name}
-                        className="w-full h-full object-contain filter drop-shadow-sm"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
