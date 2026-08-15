@@ -252,16 +252,21 @@
     }
   ],
   "settings": {
-    "heroImage": null,
+    "heroImage": "/uploads/gemini-generated-image-ra55f0ra55f0ra55-e951c3c48a37.jpg",
     "heroVideo": null,
     "heroEyebrow": null,
     "heroHeadline": null,
     "heroTagline": null,
     "heroCta": null,
-    "heroFooterNotes": null,
+    "heroFooterNotes": [
+      "The Grandmaster Series",
+      "Extrait de Parfum",
+      "Three compositions",
+      "One silhouette"
+    ],
     "compositionsRevealLabel": null,
     "compositionsEnterLabel": null,
-    "collectionBackground": "/uploads/screenshot-2026-08-14-094553-2526858ce20d.png",
+    "collectionBackground": "/uploads/gemini-generated-image-ao9lr1ao9lr1ao9l-b5bceb43d0b7.jpg",
     "collectionEyebrow": null,
     "collectionHeadline": null,
     "collectionSlides": [
@@ -301,5 +306,5 @@
     "sectionOrder": null,
     "hiddenSections": null
   },
-  "updatedAt": "2026-08-14T09:04:14.711Z"
+  "updatedAt": "2026-08-15T17:50:41.551Z"
 }
