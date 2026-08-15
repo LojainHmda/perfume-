@@ -12,11 +12,12 @@ import { HAND_TIP_X, HAND_TIP_Y, HAND_VIEW_H, HAND_VIEW_W, LeatherHand } from '.
 /**
  * Rendered width in CSS pixels; height follows the artwork's aspect.
  *
- * The photographed gauntlet is a taller crop than the drawing it replaced
- * (444x814 against 180x260), so the width comes down to keep the cursor's
- * on-screen footprint where it was — about 99px tall rather than 121.
+ * Sized by height rather than width, because that is what the eye reads as "how
+ * big is the cursor". This crop is a wider one than the gauntlet it replaced
+ * (591x823 against 444x814 — the thumb is out), so holding the width would have
+ * made it visibly shorter. 68 keeps it at about 95px tall, near the 99 before.
  */
-const SIZE_W = 54;
+const SIZE_W = 68;
 const SIZE_H = (SIZE_W * HAND_VIEW_H) / HAND_VIEW_W;
 
 /** Distance from the element's top-left corner to the drawn fingertip. */
@@ -26,6 +27,9 @@ const TIP_OFFSET_Y = (HAND_TIP_Y / HAND_VIEW_H) * SIZE_H;
 /** Follow weight. Low enough to feel carried, high enough never to read as lag. */
 const EASE = 0.24;
 const MAX_TILT = 6;
+
+/** Particles per click. Enough to read as atomised, few enough to stay cheap. */
+const DROPLETS = 18;
 
 /**
  * What counts as clickable. Deliberately structural — roles, semantics and the
@@ -134,34 +138,61 @@ export const CustomCursor: React.FC = () => {
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return;
       cursor.classList.add('is-pressing');
-      spawnRipple(e.clientX, e.clientY);
+      spawnSpray(e.clientX, e.clientY);
     };
 
     const onPointerUp = () => cursor.classList.remove('is-pressing');
 
-    /** Two concentric rings, fired once per click and reaped when they finish. */
-    const spawnRipple = (x: number, y: number) => {
+    /**
+     * The click: a press of the atomiser at the fingertip.
+     *
+     * A bloom of mist plus a scatter of droplets thrown out of it. The droplets
+     * are what sells it as perfume rather than as a ripple — a spray is a spread
+     * of discrete particles that arrive at slightly different times, so every
+     * one gets its own angle, throw, size and delay, handed to CSS as custom
+     * properties. Nothing here is animated from JS; each node runs one
+     * transform/opacity keyframe and removes itself.
+     */
+    const spawnSpray = (x: number, y: number) => {
       if (reduceMotion) return;
 
-      const make = (modifier?: string) => {
-        const ring = document.createElement('span');
-        ring.className = modifier ? `lhc-ripple ${modifier}` : 'lhc-ripple';
-        ring.style.left = `${x}px`;
-        ring.style.top = `${y}px`;
-        ripples.appendChild(ring);
+      const place = (node: HTMLSpanElement) => {
+        node.style.left = `${x}px`;
+        node.style.top = `${y}px`;
+        ripples.appendChild(node);
 
-        const remove = () => ring.remove();
-        ring.addEventListener('animationend', remove, { once: true });
+        const remove = () => node.remove();
+        node.addEventListener('animationend', remove, { once: true });
         // Safety net: an interrupted animation must not leak a node.
         const timer = window.setTimeout(() => {
           remove();
           timers.delete(timer);
-        }, 1200);
+        }, 1400);
         timers.add(timer);
       };
 
-      make();
-      make('lhc-ripple--trailing');
+      const mist = document.createElement('span');
+      mist.className = 'lhc-mist';
+      place(mist);
+
+      for (let i = 0; i < DROPLETS; i++) {
+        const drop = document.createElement('span');
+        drop.className = 'lhc-droplet';
+
+        // Thrown into the upper half, because that is where the finger points.
+        // The spread is jittered rather than evenly fanned so it never reads as
+        // a wheel of spokes.
+        const angle = (-170 + (i / DROPLETS) * 160 + (Math.random() - 0.5) * 22) * (Math.PI / 180);
+        const throwDistance = 24 + Math.random() * 52;
+
+        drop.style.setProperty('--dx', `${Math.cos(angle) * throwDistance}px`);
+        // Droplets fall as they slow, so every throw ends lower than it aimed.
+        drop.style.setProperty('--dy', `${Math.sin(angle) * throwDistance + 12 + Math.random() * 14}px`);
+        drop.style.setProperty('--s', `${1.6 + Math.random() * 3}px`);
+        drop.style.setProperty('--d', `${Math.random() * 90}ms`);
+
+        place(drop);
+      }
     };
 
     const tick = () => {

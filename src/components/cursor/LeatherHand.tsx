@@ -1,5 +1,5 @@
 import React from 'react';
-import gloveCut from '../../assets/images/glove-jewelled-cut.png';
+import gloveCut from '../../assets/images/glove-pointer-cut.png';
 
 /**
  * The cursor's hero asset: the house's jewelled gauntlet — a black leather
@@ -11,12 +11,16 @@ import gloveCut from '../../assets/images/glove-jewelled-cut.png';
  * approximation of high jewellery reads as an imitation of one. The real
  * article carries its own light, and that is the whole of its luxury.
  *
- * The cut-out is produced by scripts/knockout-glove.mjs, which keys on colour
- * rather than luminance — the ground is a saturated maroon and the glove is
- * neutral from the white stones to the black cuff, so a luminance key would eat
- * the leather. Re-run it if the source is ever re-shot:
+ * The cut-out is produced by scripts/knockout-glove.mjs, which keys this shot on
+ * luminance: it is lit on near-black, where the ground sits around 8 and the
+ * darkest leather around 30, so a soft ramp between the two keeps the glove
+ * whole. Re-run it if the source is ever re-shot:
  *
- *     node scripts/knockout-glove.mjs <source.png> <out.png> 40
+ *     node scripts/knockout-glove.mjs <source.jpg> <out.png> 40
+ *
+ * The display stand the piece was shot on is not in the cut. The script drops
+ * the floor plane and fades the cuff out above it, which is what turns a
+ * photograph of an object on a shelf into a hand.
  *
  * The artwork is stored at roughly five times its drawn size, so the browser's
  * own downsampling does the antialiasing and the stones stay crisp on a
@@ -29,14 +33,14 @@ import gloveCut from '../../assets/images/glove-jewelled-cut.png';
  *
  * Geometry contract — CustomCursor reads these to place the fingertip exactly
  * on the pointer, and index.css hard-codes the same point as a transform-origin
- * (30.18% 4.91%) plus the ray origin in view units. All of them must move
- * together, and the knockout script prints the tip it found:
- *   viewBox 444 x 814, fingertip at (134, 40).
+ * (42.81% 4.86%) plus the ray and spray origin in view units. All of them must
+ * move together, and the knockout script prints the tip it found:
+ *   viewBox 591 x 823, fingertip at (253, 40).
  */
 
-export const HAND_VIEW_W = 444;
-export const HAND_VIEW_H = 814;
-export const HAND_TIP_X = 134;
+export const HAND_VIEW_W = 591;
+export const HAND_VIEW_H = 823;
+export const HAND_TIP_X = 253;
 export const HAND_TIP_Y = 40;
 
 /**
@@ -88,7 +92,7 @@ export const LeatherHand: React.FC = () => (
 
     {/* Ground shadow. Offset by CustomCursor each frame so it drifts with motion. */}
     <g className="lhc-shadow">
-      <ellipse cx="228" cy="792" rx="132" ry="26" fill="url(#lhc-contact)" />
+      <ellipse cx="300" cy="800" rx="150" ry="24" fill="url(#lhc-contact)" />
     </g>
 
     {/*

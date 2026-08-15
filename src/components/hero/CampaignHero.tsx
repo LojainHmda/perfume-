@@ -19,9 +19,12 @@ interface CampaignHeroProps {
  *
  * The plate is the whole frame — the set floats in the void because the image
  * edges are masked out into the obsidian ground rather than stopping on a hard
- * rectangle. The type sits ON the plate, held in the empty left third; the
- * column is width-capped so it never reaches the bottle or the chess group,
- * which start around 30% across.
+ * rectangle. The type sits ON the plate, held in the empty left third over a
+ * scrim of frosted glass — the same `.frosted` mix as the header and the
+ * handover band, so the three read as one sheet laid over the campaign, but
+ * masked so it dissolves rather than ending on an edge. The column is
+ * width-capped so it never reaches the bottle or the chess group, which start
+ * around 30% across.
  *
  * Deliberately static: no parallax, no scroll transform, no entrance animation.
  * The only motion is the hover rule under the call to action.
@@ -77,7 +80,15 @@ export const CampaignHero: React.FC<CampaignHeroProps> = ({ feature, content, on
 
       {/* ---- The type: over the plate, held clear of the set ---- */}
       <div className="relative z-20 flex h-full flex-col justify-end px-6 pb-24 sm:px-10 sm:justify-center sm:pb-0 lg:px-16">
-        <div className="max-w-[22rem] sm:max-w-[26vw] lg:max-w-[27vw]">
+        <div className="relative max-w-[22rem] sm:max-w-[26vw] lg:max-w-[27vw]">
+          {/* The haze the copy reads against. The insets are percentages of the
+              copy itself, so the layer is always three times the block it sits
+              behind and the mask's ramps always have a full text-width to
+              vanish in — whatever the breakpoint does to the column. */}
+          <span
+            aria-hidden
+            className="frosted frosted-veil pointer-events-none absolute -inset-x-[100%] -inset-y-[100%] -z-10"
+          />
           <p className="notation mb-4 text-[color:var(--accent-type)]">{eyebrow}</p>
 
           <h1 className="font-sans text-[clamp(1.9rem,3.4vw,3.4rem)] font-bold uppercase leading-[0.9] tracking-tight text-porcelain">
@@ -102,7 +113,7 @@ export const CampaignHero: React.FC<CampaignHeroProps> = ({ feature, content, on
       </div>
 
       {/* ---- The handover into the collection ---- */}
-      <div className="absolute inset-x-0 bottom-0 z-30 border-t border-[color:var(--border-subtle)] bg-obsidian/70 px-6 py-4 backdrop-blur-sm sm:px-10 lg:px-16">
+      <div className="frosted absolute inset-x-0 bottom-0 z-30 border-t border-[color:var(--border-subtle)] px-6 py-4 sm:px-10 lg:px-16">
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 sm:justify-between">
           {footerNotes.map((item) => (
             <span key={item} className="notation text-ash">

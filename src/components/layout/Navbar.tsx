@@ -5,8 +5,9 @@ import { ShoppingBag, User } from 'lucide-react';
 
 /**
  * Two-tier maison header: the wordmark holds the centre, navigation sits on its
- * own line beneath, and account/bag stay out at the right margin. The bar is
- * weightless over the hero and only gains a ground once the page moves.
+ * own line beneath, and account/bag stay out at the right margin. The bar rides
+ * on a haze that thins away downward rather than on a panel: it has no ground,
+ * no rule and no bottom edge, and gains only density once the page moves.
  */
 export const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -30,12 +31,19 @@ export const Navbar: React.FC = () => {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        lifted
-          ? 'border-b border-[color:var(--border-subtle)] bg-obsidian/85 backdrop-blur-md'
-          : 'border-b border-transparent bg-transparent'
-      }`}
+      className="fixed inset-x-0 top-0 z-50"
     >
+      {/* The haze the bar reads against. It carries the blur on its own layer,
+          below the links, because a mask on the header itself would fade the
+          words out with the glass. It reaches past the bar's own height so the
+          fade finishes in open hero rather than at the header's boundary. */}
+      <span
+        aria-hidden
+        className={`frosted frosted-fade-down pointer-events-none absolute inset-x-0 top-0 -z-10 h-[190%] transition-opacity duration-500 ${
+          lifted ? 'opacity-100' : 'opacity-75'
+        }`}
+      />
+
       <div className="relative flex items-center justify-between px-6 py-5 sm:px-10 lg:px-16">
         {/* Left: sections */}
         <nav className="flex items-center gap-6 sm:gap-8" aria-label="Primary">

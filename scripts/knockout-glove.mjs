@@ -1,26 +1,53 @@
 import fs from 'fs';
 import path from 'path';
+import { Jimp } from 'jimp';
 import { PNG } from 'pngjs';
 
 /**
- * Cut the jewelled glove out of its maroon studio ground.
+ * Cut the jewelled gauntlet out of its black studio ground.
  *
- * The separation is colour, not luminance: the ground is a saturated warm red
- * and the subject is neutral throughout — white stones, grey platinum, black
- * leather. Testing "is this pixel warm and saturated" keeps the black cuff,
- * which a luminance key would eat.
+ * The separation is luminance, not colour. An earlier gauntlet was shot on
+ * saturated maroon, where "is this pixel strongly coloured for how dark it is"
+ * keyed cleanly and kept the black leather; this one is shot on near-black,
+ * where every hue test is meaningless. Measured off the source:
  *
- * The bokeh sparkles scattered over the ground are neutral and bright, so they
- * survive that test. They are removed structurally instead: keep only the
- * largest connected run of subject pixels, which is the glove.
+ *     ground            lum  7 - 13
+ *     leather, finger   lum 30 - 32
+ *     leather, thumb    lum 42 - 53
+ *     floor plane       lum 24 - 73
+ *
+ * So the ground clears the darkest leather by better than 2x and a soft ramp
+ * between the two keeps the glove whole. The floor is the awkward part: it is
+ * brighter than the finger leather, so no luminance threshold can drop it, and
+ * it touches the finial the glove stands on, so connectivity cannot either. It
+ * is cut structurally instead, at the row where the row-median luminance climbs
+ * off the ground — see findFloor.
+ *
+ *     node scripts/knockout-glove.mjs <source.jpg|png> <out.png> [pad]
+ *
+ * The artwork is stored at roughly five times its drawn size, so the browser's
+ * own downsampling does the antialiasing and the stones stay crisp on a
+ * high-DPI screen. The tip this prints is the geometry contract with
+ * LeatherHand.tsx and index.css — see the note there.
  */
 const SRC = process.argv[2];
 const OUT = process.argv[3];
+const PAD = Number(process.argv[4] ?? 40);
 
-const png = PNG.sync.read(fs.readFileSync(SRC));
-const { width: W, height: H, data } = png;
+/** Alpha ramp in luminance. Below LO is certainly ground, above HI is subject. */
+const LUM_LO = 13;
+const LUM_HI = 28;
+
+/** How far the base fades out above the floor cut, so it is not sliced flat. */
+const BASE_FADE = 26;
+
+const img = await Jimp.read(SRC);
+const W = img.bitmap.width;
+const H = img.bitmap.height;
+const data = img.bitmap.data;
 
 const at = (x, y) => (y * W + x) * 4;
+const lumAt = (i) => 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
 
 const smoothstep = (lo, hi, v) => {
   const t = Math.max(0, Math.min(1, (v - lo) / (hi - lo)));
@@ -28,52 +55,50 @@ const smoothstep = (lo, hi, v) => {
 };
 
 /**
- * 0 = certainly ground, 1 = certainly subject, with a soft band between.
+ * The top of the floor plane.
  *
- * Saturation has to be measured relative to the pixel's own brightness. The
- * ground is dark maroon, so in absolute terms its channels are close together
- * and an absolute "how much redder than blue" test reads it as nearly neutral —
- * which is what kept the whole background on the first pass. chroma/max says
- * "strongly coloured for how dark it is", which is the actual question.
+ * Rows that cross only ground and glove are overwhelmingly ground, so their
+ * median luminance sits down at the ground's own value. Rows that cross the
+ * floor are mostly floor, and the median jumps. Walking up from the bottom and
+ * stopping at the first row that reads as ground finds the seam without
+ * hard-coding a fraction of the frame.
  */
-const subjectness = (x, y) => {
-  const i = at(x, y);
-  const r = data[i];
-  const g = data[i + 1];
-  const b = data[i + 2];
+const findFloor = () => {
+  const median = (y) => {
+    const vals = [];
+    for (let x = 0; x < W; x += 2) vals.push(lumAt(at(x, y)));
+    vals.sort((a, b) => a - b);
+    return vals[vals.length >> 1];
+  };
 
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const chroma = max - min;
-
-  // The close-button chrome sits over the top of the frame. It is neutral, so
-  // the colour test would keep it; it is also only ever up there.
-  if (y < 62 && chroma < 26 && max < 110) return 0;
-
-  // Near-black is glove shadow. Nothing can be said about its hue.
-  if (max < 10) return 1;
-
-  const sat = chroma / max;
-  if (sat < 0.16) return 1;
-
-  // Hue in degrees; only the red-to-magenta wedge is ground.
-  let hue = 0;
-  if (max === r) hue = (60 * ((g - b) / chroma) + 360) % 360;
-  else if (max === g) hue = 60 * ((b - r) / chroma) + 120;
-  else hue = 60 * ((r - g) / chroma) + 240;
-
-  const isGroundHue = hue >= 300 || hue <= 32;
-  if (!isGroundHue) return 1;
-
-  return 1 - smoothstep(0.16, 0.32, sat);
+  const GROUND = 20;
+  let seam = H;
+  for (let y = H - 1; y >= 0; y--) {
+    if (median(y) <= GROUND) {
+      seam = y + 1;
+      break;
+    }
+  }
+  // A frame with no floor at all leaves the seam at the bottom edge.
+  return Math.min(seam, H);
 };
+
+const floorY = findFloor();
 
 const alpha = new Float32Array(W * H);
 for (let y = 0; y < H; y++) {
-  for (let x = 0; x < W; x++) alpha[y * W + x] = subjectness(x, y);
+  // Everything at or below the seam is floor; the rows just above it fade out
+  // so the finial is not left sitting on a sliced edge.
+  const baseFade = y >= floorY ? 0 : smoothstep(0, BASE_FADE, floorY - y);
+  if (baseFade <= 0) continue;
+
+  for (let x = 0; x < W; x++) {
+    alpha[y * W + x] = smoothstep(LUM_LO, LUM_HI, lumAt(at(x, y))) * baseFade;
+  }
 }
 
 // --- Largest connected component of solid-ish pixels ---
+// Drops dust, lens flare and any stray floor blob that survived the seam cut.
 const solid = new Uint8Array(W * H);
 for (let i = 0; i < alpha.length; i++) solid[i] = alpha[i] > 0.5 ? 1 : 0;
 
@@ -114,7 +139,6 @@ for (let start = 0; start < solid.length; start++) {
   if (size > best.size) best = { id, size };
 }
 
-// Anything not attached to the glove is a sparkle or chrome.
 for (let i = 0; i < alpha.length; i++) {
   if (alpha[i] > 0 && label[i] !== best.id) alpha[i] = 0;
 }
@@ -122,10 +146,11 @@ for (let i = 0; i < alpha.length; i++) {
 /**
  * Close the holes.
  *
- * The stones mirror the maroon ground, so the colour key punches transparent
- * pits through the middle of the setting. Real background is reachable from the
- * frame edge; a reflection is not. Flood the outside, then anything still
- * transparent is interior and gets filled back in.
+ * Shadow inside the setting and between the fingers reads as ground to a
+ * luminance key, punching transparent pits through the middle of the glove.
+ * Real ground is reachable from the frame edge; an enclosed shadow is not.
+ * Flood the outside, then anything still transparent is interior and is filled
+ * back in — which is also what reclaims the darkest leather.
  */
 const outside = new Uint8Array(W * H);
 let head = 0;
@@ -178,15 +203,12 @@ for (let y = 0; y < H; y++) {
   }
 }
 
-/**
- * One pass of 3x3 averaging on the alpha only.
- *
- * The key comes out binary — the ground's saturation and the glove's are far
- * enough apart that almost nothing lands in the soft band — and a hard matte
- * shows its stair-steps on the diagonal edges of the setting. The artwork is
- * drawn about five times smaller than it is stored, so this plus the browser's
- * own downsampling is enough.
- */
+if (maxX < 0) {
+  console.error('nothing survived the key — widen LUM_LO/LUM_HI');
+  process.exit(1);
+}
+
+/** One pass of 3x3 averaging on the alpha only, to take the stair-steps off. */
 const feathered = Float32Array.from(alpha);
 for (let y = 1; y < H - 1; y++) {
   for (let x = 1; x < W - 1; x++) {
@@ -197,9 +219,6 @@ for (let y = 1; y < H - 1; y++) {
     feathered[y * W + x] = sum / 9;
   }
 }
-
-/** Transparent margin, so the fingertip rays have somewhere to be drawn. */
-const PAD = Number(process.argv[4] ?? 40);
 
 const cw = maxX - minX + 1 + PAD * 2;
 const ch = maxY - minY + 1 + PAD * 2;
@@ -212,22 +231,11 @@ for (let y = PAD; y < ch - PAD; y++) {
     const sy = minY + y - PAD;
     const s = at(sx, sy);
     const d = (y * cw + x) * 4;
-    const a = feathered[sy * W + sx];
 
-    // Un-mix the ground's red out of the semi-transparent rim, or every edge
-    // keeps a maroon fringe once it is composited on the site's obsidian.
-    let r = data[s];
-    let g = data[s + 1];
-    let b = data[s + 2];
-    if (a > 0.02 && a < 0.98) {
-      const neutral = (g + b) / 2;
-      if (r > neutral) r = neutral + (r - neutral) * 0.35;
-    }
-
-    out.data[d] = r;
-    out.data[d + 1] = g;
-    out.data[d + 2] = b;
-    out.data[d + 3] = Math.round(Math.max(0, Math.min(1, a)) * 255);
+    out.data[d] = data[s];
+    out.data[d + 1] = data[s + 1];
+    out.data[d + 2] = data[s + 2];
+    out.data[d + 3] = Math.round(Math.max(0, Math.min(1, feathered[sy * W + sx])) * 255);
   }
 }
 
@@ -250,6 +258,7 @@ for (let y = 0; y < ch && tipY < 0; y++) {
 const tipX = Math.round(tipXs.reduce((a, b) => a + b, 0) / tipXs.length);
 
 console.log(`source   ${W}x${H}`);
+console.log(`floor    cut at y${floorY} of ${H}`);
 console.log(`crop     x${minX} y${minY} -> ${cw}x${ch}`);
 console.log(`tip      (${tipX}, ${tipY})  = ${((tipX / cw) * 100).toFixed(2)}% ${((tipY / ch) * 100).toFixed(2)}%`);
 console.log(`wrote    ${OUT}`);
